@@ -12,6 +12,7 @@ declare global {
 
 export function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const playerRef = useRef<any>(null);
   
   // Menggunakan ID video dari pengguna: fvUW0Po9Fcc
@@ -34,15 +35,11 @@ export function AudioPlayer() {
         width: '10',
         videoId: videoId,
         playerVars: {
-          autoplay: 1, 
+          autoplay: 0, // Matikan autoplay bawaan yt agar kita kontrol manual lewat overlay
           controls: 0,
           disablekb: 1,
         },
         events: {
-          'onReady': (event: any) => {
-             // Coba putar otomatis saat siap
-             event.target.playVideo();
-          },
           'onStateChange': (event: any) => {
             // YT.PlayerState.ENDED adalah 0 (Saat musik selesai)
             if (event.data === 0) {
@@ -76,29 +73,12 @@ export function AudioPlayer() {
     };
   }, [videoId]);
 
-  // Mengakali kebijakan Auto-play browser: Putar saat user klik atau scroll halaman pertama kali
-  useEffect(() => {
-    const handleInteraction = () => {
-      if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
-        const state = playerRef.current.getPlayerState();
-        // Jika belum main, mainkan
-        if (state !== 1) {
-          playerRef.current.playVideo();
-        }
-      }
-      // Hapus pendengar event setelah interaksi pertama
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('scroll', handleInteraction);
-    };
-    
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('scroll', handleInteraction);
-    
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('scroll', handleInteraction);
-    };
-  }, []);
+  const handleEnter = () => {
+    setHasEntered(true);
+    if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+      playerRef.current.playVideo();
+    }
+  };
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation(); // Mencegah trigger event klik ganda
@@ -114,6 +94,23 @@ export function AudioPlayer() {
 
   return (
     <>
+      {!hasEntered && (
+        <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-amber-500 mb-8 tracking-widest text-center" style={{ fontFamily: 'var(--font-outfit)' }}>
+            MISTERI BABEL
+          </h1>
+          <button 
+            onClick={handleEnter}
+            className="px-8 py-4 border-2 border-amber-500 text-amber-500 text-xl tracking-widest hover:bg-amber-500 hover:text-black transition-all cursor-pointer"
+          >
+            MULAI PERJALANAN
+          </button>
+          <p className="text-gray-500 mt-6 text-sm tracking-wide">
+            ( Disarankan menggunakan earphone / aktifkan suara )
+          </p>
+        </div>
+      )}
+
       <button
         onClick={togglePlay}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-black/60 border border-amber-500/30 text-amber-500 hover:bg-amber-900/40 backdrop-blur-md transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)]"
