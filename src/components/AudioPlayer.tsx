@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 declare global {
   interface Window {
@@ -94,22 +95,28 @@ export function AudioPlayer() {
 
   return (
     <>
-      {!hasEntered && (
-        <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-amber-500 mb-8 tracking-widest text-center" style={{ fontFamily: 'var(--font-outfit)' }}>
-            MISTERI BABEL
-          </h1>
-          <button 
-            onClick={handleEnter}
-            className="px-8 py-4 border-2 border-amber-500 text-amber-500 text-xl tracking-widest hover:bg-amber-500 hover:text-black transition-all cursor-pointer"
+      <AnimatePresence>
+        {!hasEntered && (
+          <motion.div 
+            initial={{ opacity: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, filter: "blur(20px)", transition: { duration: 1.5, ease: "easeInOut" } }}
+            className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-center"
           >
-            MULAI PERJALANAN
-          </button>
-          <p className="text-gray-500 mt-6 text-sm tracking-wide">
-            ( Disarankan menggunakan earphone / aktifkan suara )
-          </p>
-        </div>
-      )}
+            <h1 className="text-4xl md:text-6xl font-bold text-amber-500 mb-8 tracking-widest text-center" style={{ fontFamily: 'var(--font-outfit)' }}>
+              MISTERI BABEL
+            </h1>
+            <button 
+              onClick={handleEnter}
+              className="px-8 py-4 border-2 border-amber-500 text-amber-500 text-xl tracking-widest hover:bg-amber-500 hover:text-black transition-all cursor-pointer"
+            >
+              MULAI PERJALANAN
+            </button>
+            <p className="text-gray-500 mt-6 text-sm tracking-wide">
+              ( Disarankan menggunakan earphone / aktifkan suara )
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <button
         onClick={togglePlay}
